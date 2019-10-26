@@ -97,11 +97,7 @@ class App extends Component {
 			this.socket.close();
 			this.socket = null;
 		}
-		this.socket = socketio(`https://democraticdj.io`, {
-			path: `/8099/socket.io`,
-			transports: ["polling", "websocket", "xhr-polling", "jsonp-polling"],
-		});
-		window.socket = this.socket;
+		this.socket = this.props.serverConnection;
 
 		// // listen to events and dispatch actions:
 		// handleStreamEvents(this.socket, this.props.store.dispatch);
@@ -133,7 +129,7 @@ class App extends Component {
 	}
 
 	handleClose() {
-		this.props.history.push(`party?room=${this.state.roomName}`);
+		this.props.history.push(`party/${this.state.roomName}`);
 		this.setState({ open: false });
 	}
 

@@ -77,12 +77,8 @@ io.on("connection", (socket) => {
 
 		let roomName = data.roomName;
 
-		if (client.rooms.indexOf(roomName) === -1) {
-			clients[socket.id].rooms.push(roomName);
-		}
-
 		socket.join(roomName);
-		clients[socket.id].room = roomName;
+		clients[socket.id].roomName = roomName;
 		clients[socket.id].username = data.username || "empty";
 
 		cb({

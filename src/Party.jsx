@@ -97,6 +97,8 @@ class Party extends Component {
 		// 	dispatch: this.props.store.dispatch,
 		// });
 
+		this.socket = this.props.serverConnection;
+
 		this.roomName = this.props.match.params.roomName;
 
 		if (!this.roomName) {
@@ -111,14 +113,17 @@ class Party extends Component {
 	// }
 
 	handleSubmitUsername() {
-		this.props.socket.emit("joinRoom", { room });
-
-		this.setState({ openUsernameDialog: false });
+		this.socket.emit("joinRoom", { room: this.roomName }, (data) => {
+			if (data.success) {
+				this.setState({ openUsernameDialog: false });
+			} else {
+				alert(data.reason);
+			}
+		});
 	}
 
-	handleText() {
-		// todo:
-		// submit text with enter key:
+	handleText(event) {
+		this.setState({ username: event.target.value });
 	}
 
 	render() {
