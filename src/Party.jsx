@@ -124,6 +124,7 @@ class Party extends Component {
 
 	handleText(event) {
 		this.setState({ username: event.target.value });
+		console.log(event);
 	}
 
 	render() {
@@ -151,6 +152,12 @@ class Party extends Component {
 							type="username"
 							value={this.state.username}
 							onChange={this.handleText}
+							onKeyPress={(event) => {
+								if (event.key == 'Enter'){
+									console.log("Enter key pressed");
+									this.handleSubmitUsername();
+								}
+							}}
 							fullWidth
 						/>
 					</DialogContent>

@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 // react-router:
 import { Route, Switch } from "react-router";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 
 // material ui:
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -140,7 +140,7 @@ class Index extends Component {
 			<Provider store={store}>
 				<ThemeProvider theme={this.state.theme}>
 					<CssBaseline />
-					<BrowserRouter>
+					<HashRouter>
 						{/* selects the first matching path: */}
 						<Switch>
 							<Route
@@ -157,7 +157,7 @@ class Index extends Component {
 								}}
 							/>
 						</Switch>
-					</BrowserRouter>
+					</HashRouter>
 				</ThemeProvider>
 			</Provider>
 		);
