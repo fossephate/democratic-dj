@@ -32,6 +32,7 @@ const sagaMiddleware = createSagaMiddleware();
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 let preloadedState = {
+	songList: [],
 	form: {},
 };
 
@@ -67,7 +68,9 @@ class Index extends Component {
 		this.switchTheme = this.switchTheme.bind(this);
 	}
 
-	componentDidMount() {}
+	componentDidMount() {
+		this.switchTheme("dark");
+	}
 
 	switchTheme(themeName) {
 		let theme = {};

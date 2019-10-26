@@ -7,23 +7,22 @@ import { Route, Switch, withRouter } from "react-router";
 // redux:
 import { connect } from "react-redux";
 
-import { updateClientInfo } from "src/actions/clientInfo.js";
-import { updateSettings } from "src/actions/settings.js";
-import { updateMessages } from "src/actions/chat.js";
-import { leavePlayerControlQueue, joinPlayerControlQueue } from "src/actions/players.js";
-
 // redux-saga:
-import handleStreamActions from "src/sagas/stream";
-import handleStreamEvents from "src/sockets/stream";
+// import handleStreamActions from "src/sagas/stream";
+// import handleStreamEvents from "src/sockets/stream";
 
 // main components:
-
-// loading circle:
-// import LoadingCircle from "src/components/LoadingCircle.jsx";
+import Party from "src/Party.jsx";
 
 // components:
 
 // secondary components:
+import { Button, Paper, TextField } from "@material-ui/core";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 
 // material ui:
 import { withStyles } from "@material-ui/core/styles";
@@ -35,13 +34,6 @@ import { compose } from "recompose";
 import { device } from "src/constants/DeviceSizes.js";
 
 // libs:
-// jquery:
-let $ = require("jquery");
-window.$ = $;
-
-// input handler:
-
-// const textFitPercent = require("js/textfitpercent.js");
 import localforage from "localforage";
 window.localforage = localforage;
 import swal from "sweetalert2";
@@ -57,6 +49,31 @@ const styles = {
 	[device.laptop]: {
 		root: {},
 	},
+
+	mainContainer: {
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "space-evenly",
+		height: "500px",
+		padding: "5% 20%",
+		height: "95vh",
+	},
+
+	textField: {
+		margin: "0px",
+	},
+	formPart: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-evenly",
+		// width: "50%",
+		height: "min-content",
+		// padding: "0 20%",
+	},
+	centerText: {
+		display: "flex !important",
+		justifyContent: "center !important",
+	},
 };
 
 class App extends Component {
@@ -64,7 +81,15 @@ class App extends Component {
 		super(props);
 		this.socket = null;
 
-		this.state = {};
+		this.handleJoin = this.handleJoin.bind(this);
+		this.handleCreate = this.handleCreate.bind(this);
+		this.handleText = this.handleText.bind(this);
+		this.handleClose = this.handleClose.bind(this);
+
+		this.state = {
+			roomName: "",
+			open: false,
+		};
 	}
 
 	componentDidMount() {
@@ -94,6 +119,29 @@ class App extends Component {
 	// 	return false;
 	// }
 
+	handleJoin() {}
+
+	handleCreate() {
+		this.socket.emit("createRoom", null, (data) => {
+			console.log(data);
+			if (data.success) {
+				this.setState({ open: true, roomName: data.roomName });
+			} else {
+				alert(data.reason);
+			}
+		});
+	}
+
+	handleClose() {
+		this.props.history.push(`party?room=${this.state.roomName}`);
+		this.setState({ open: false });
+	}
+
+	handleText(event) {
+		// console.log(event.target.value);
+		this.setState({ roomName: event.target.value });
+	}
+
 	render() {
 		console.log("re-rendering app.");
 
@@ -101,7 +149,79 @@ class App extends Component {
 
 		return (
 			<div className={classes.root}>
-				<div>bbbbb</div>
+				<Switch>
+					<Route
+						path="/party/:roomName"
+						render={(props) => {
+							return (
+								<Party
+									{...props}
+									store={this.props.store}
+									serverConnection={this.props.serverConnection}
+									sagaMiddleware={this.props.sagaMiddleware}
+								/>
+							);
+						}}
+					/>
+					<Route
+						path="/"
+						render={(props) => {
+							return (
+								<Paper elevation={4} className={classes.mainContainer}>
+									<div className={classes.formPart}>
+										<TextField
+											id="outlined-name"
+											label="Room Name"
+											className={classes.textField}
+											value={this.state.roomName}
+											onChange={this.handleText}
+											margin="normal"
+											variant="outlined"
+										/>
+										<Button
+											variant="contained"
+											color="primary"
+											size="medium"
+											onClick={this.handleJoin}
+										>
+											Join Room
+										</Button>
+									</div>
+									<h1 className={classes.centerText}>OR</h1>
+									<div className={classes.formPart}>
+										<Button
+											variant="contained"
+											color="secondary"
+											size="large"
+											onClick={this.handleCreate}
+										>
+											Create A Room
+										</Button>
+									</div>
+
+									<Dialog
+										open={this.state.open}
+										onClose={this.handleClose}
+										fullWidth={true}
+										maxWidth="md"
+									>
+										<DialogTitle id="alert-dialog-title">{"Room Created!"}</DialogTitle>
+										<DialogContent>
+											<DialogContentText id="alert-dialog-description">
+												The room has been created with room name {this.state.roomName}
+											</DialogContentText>
+										</DialogContent>
+										<DialogActions>
+											<Button onClick={this.handleClose} color="primary">
+												OK
+											</Button>
+										</DialogActions>
+									</Dialog>
+								</Paper>
+							);
+						}}
+					/>
+				</Switch>
 			</div>
 		);
 	}
