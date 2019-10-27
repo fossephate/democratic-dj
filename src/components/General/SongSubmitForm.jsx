@@ -7,12 +7,12 @@ import React, { PureComponent } from "react";
 
 // material ui:
 import { withStyles } from "@material-ui/core/styles";
-import { Button, Paper, TextField } from "@material-ui/core";
+import { Paper, TextField } from "@material-ui/core";
 
 // redux:
 import { connect } from "react-redux";
 
-import { updateSearchResults } from "src/actions/songs.js";
+import { updateSongName, updateSearchResults } from "src/actions/songs.js";
 
 // recompose:
 import { compose } from "recompose";
@@ -20,13 +20,57 @@ import { compose } from "recompose";
 // libs:
 // import swal from "sweetalert2";
 
+// Returns a function, that, when invoked, will only be triggered at most once
+// during a given window of time. Normally, the throttled function will run
+// as much as it can, without ever going more than once per `wait` duration;
+// but if you'd like to disable the execution on the leading edge, pass
+// `{leading: false}`. To disable execution on the trailing edge, ditto.
+function throttle(func, wait, options) {
+	var context, args, result;
+	var timeout = null;
+	var previous = 0;
+	if (!options) options = {};
+	var later = function() {
+		previous = options.leading === false ? 0 : Date.now();
+		timeout = null;
+		result = func.apply(context, args);
+		if (!timeout) context = args = null;
+	};
+	return function() {
+		var now = Date.now();
+		if (!previous && options.leading === false) previous = now;
+		var remaining = wait - (now - previous);
+		context = this;
+		args = arguments;
+		if (remaining <= 0 || remaining > wait) {
+			if (timeout) {
+				clearTimeout(timeout);
+				timeout = null;
+			}
+			previous = now;
+			result = func.apply(context, args);
+			if (!timeout) context = args = null;
+		} else if (!timeout && options.trailing !== false) {
+			timeout = setTimeout(later, remaining);
+		}
+		return result;
+	};
+}
+
+let searchForSong = throttle((self, value) => {
+	self.socket.emit("searchSong", { songName: value }, (data) => {
+		self.props.updateSearchResults(data.searchResults);
+	});
+}, 500);
+
 // jss:
 
 const styles = (theme) => ({
 	root: {
 		display: "flex",
 		flexDirection: "row",
-		marginBottom: "2%",
+		// marginBottom: "2%",
+		minHeight: "14vh",
 	},
 	textField: {
 		margin: "2%",
@@ -40,7 +84,6 @@ class SongSubmitForm extends PureComponent {
 		this.socket = null;
 
 		this.handleText = this.handleText.bind(this);
-		this.handleSubmitSong = this.handleSubmitSong.bind(this);
 
 		this.state = {
 			songName: "",
@@ -53,7 +96,8 @@ class SongSubmitForm extends PureComponent {
 	}
 
 	handleText(event) {
-		this.setState({ songName: event.target.value });
+		// this.setState({ songName: event.target.value });
+		this.props.updateSongName(event.target.value);
 
 		// don't bother if the string is empty:
 		if (event.target.value === "") {
@@ -61,25 +105,12 @@ class SongSubmitForm extends PureComponent {
 			return;
 		}
 
-		this.socket.emit("searchSong", { songName: event.target.value }, (data) => {
-			// console.log(data.searchResults);
-			this.props.updateSearchResults(data.searchResults);
-		});
-	}
+		// this.socket.emit("searchSong", { songName: event.target.value }, (data) => {
+		// 	// console.log(data.searchResults);
+		// 	this.props.updateSearchResults(data.searchResults);
+		// });
 
-	handleSubmitSong() {
-		this.socket.emit(
-			"submitSong",
-			{
-				songName: this.state.songName,
-			},
-			(data) => {
-				if (!data.success) {
-					alert(data.reason);
-				}
-			},
-		);
-		this.setState({ songName: "" });
+		searchForSong(this, event.target.value);
 	}
 
 	render() {
@@ -89,33 +120,30 @@ class SongSubmitForm extends PureComponent {
 			<Paper id="songSubmitForm" className={classes.root} elevation={4}>
 				<TextField
 					id="outlined-name"
-					label="Song Name"
+					label="Enter a Song"
 					className={classes.textField}
-					value={this.state.songName}
+					value={this.props.songName}
 					onChange={this.handleText}
-					onKeyPress={(event) => {
-						if (event.key == "Enter") {
-							this.handleSubmitSong();
-						}
-					}}
 					margin="normal"
 					variant="outlined"
 					fullWidth
 				/>
-				<Button onClick={this.handleSubmitSong} color="primary">
-					Submit
-				</Button>
 			</Paper>
 		);
 	}
 }
 
 const mapStateToProps = (state) => {
-	return {};
+	return {
+		songName: state.songs.songName,
+	};
 };
 
 const mapDispatchToProps = (dispatch) => {
 	return {
+		updateSongName: (data) => {
+			dispatch(updateSongName(data));
+		},
 		updateSearchResults: (data) => {
 			dispatch(updateSearchResults(data));
 		},

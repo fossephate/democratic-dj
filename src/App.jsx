@@ -74,6 +74,9 @@ const styles = {
 		display: "flex !important",
 		justifyContent: "center !important",
 	},
+	joinButton: {
+		whiteSpace: "nowrap",
+	},
 };
 
 class App extends Component {
@@ -115,11 +118,12 @@ class App extends Component {
 	// 	return false;
 	// }
 
-	handleJoin() {}
+	handleJoin() {
+		this.props.history.push(`party/${this.state.roomName}`);
+	}
 
 	handleCreate() {
 		this.socket.emit("createRoom", null, (data) => {
-			console.log(data);
 			if (data.success) {
 				this.setState({ open: true, roomName: data.roomName });
 			} else {
@@ -164,6 +168,7 @@ class App extends Component {
 						render={(props) => {
 							return (
 								<Paper elevation={4} className={classes.mainContainer}>
+									<h1 style={{ textAlign: "center" }}>Democratic DJ</h1>
 									<div className={classes.formPart}>
 										<TextField
 											id="outlined-name"
@@ -175,15 +180,21 @@ class App extends Component {
 											variant="outlined"
 										/>
 										<Button
+											className={classes.joinButton}
 											variant="contained"
 											color="primary"
 											size="medium"
 											onClick={this.handleJoin}
+											onKeyPress={(event) => {
+												if (event.key == "Enter") {
+													this.handleJoin();
+												}
+											}}
 										>
 											Join Room
 										</Button>
 									</div>
-									<h1 className={classes.centerText}>OR</h1>
+									<h2 className={classes.centerText}>OR</h2>
 									<div className={classes.formPart}>
 										<Button
 											variant="contained"
@@ -204,11 +215,15 @@ class App extends Component {
 										<DialogTitle id="alert-dialog-title">{"Room Created!"}</DialogTitle>
 										<DialogContent>
 											<DialogContentText id="alert-dialog-description">
-												The room has been created with room name {this.state.roomName}
+												The room has been created with the room name {this.state.roomName}
 											</DialogContentText>
 										</DialogContent>
 										<DialogActions>
-											<Button onClick={this.handleClose} color="primary">
+											<Button
+												onClick={this.handleClose}
+												color="primary"
+												variant="contained"
+											>
 												OK
 											</Button>
 										</DialogActions>

@@ -7,7 +7,6 @@ const config = require("./config.js");
 
 const Client = require("./client.js").Client;
 const Party = require("./client.js").Party;
-const Song = require("./client.js").Song;
 
 const session = require("express-session");
 let SpotifyWebApi = require("spotify-web-api-node");
@@ -30,7 +29,7 @@ server.listen(port, () => {
 // misc:
 function generatePartyIdentifier() {
 	let sizeOfString = 4;
-	let charset = "abcdefghijklmnopqrstuvwxyz123456789";
+	let charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
 	let identifier = "";
 	for (let counter = 0; counter < sizeOfString; counter++) {
 		identifier += charset[Math.floor(Math.random() * charset.length)];
@@ -43,19 +42,24 @@ let spotifyApi = new SpotifyWebApi({
 	clientSecret: "9f2ddb790efa4402997be72366ef6c7f",
 });
 
-// Retrieve an access token
-spotifyApi.clientCredentialsGrant().then(
-	(data) => {
-		console.log("The access token expires in " + data.body["expires_in"]);
-		console.log("The access token is " + data.body["access_token"]);
+function getAndRefreshToken() {
+	// Retrieve an access token
+	spotifyApi.clientCredentialsGrant().then(
+		(data) => {
+			console.log("The access token expires in " + data.body["expires_in"]);
+			console.log("The access token is " + data.body["access_token"]);
 
-		// Save the access token so that it's used in future calls
-		spotifyApi.setAccessToken(data.body["access_token"]);
-	},
-	(error) => {
-		console.log("Something went wrong when retrieving an access token", error.message);
-	},
-);
+			// Save the access token so that it's used in future calls
+			spotifyApi.setAccessToken(data.body["access_token"]);
+		},
+		(error) => {
+			console.log("Something went wrong when retrieving an access token", error.message);
+		},
+	);
+}
+
+setInterval(getAndRefreshToken, 1000 * 60 * 55);
+getAndRefreshToken();
 
 let parties = {};
 
@@ -95,9 +99,24 @@ io.on("connection", (socket) => {
 			return;
 		}
 
+		let party = parties[data.roomName];
+
+		if (!party) {
+			console.log("party not found!");
+			cb({ success: false, reason: "party not found!" });
+			return;
+		}
+
+		if (parties[data.roomName].usernames.indexOf(data.username) > -1) {
+			console.log("username in use!");
+			cb({ success: false, reason: "username in use!" });
+			return;
+		}
+
+		parties[data.roomName].usernames.push(data.username);
 		socket.join(data.roomName);
 		clients[socket.id].roomName = data.roomName;
-		clients[socket.id].username = data.username || "empty";
+		clients[socket.id].username = data.username;
 
 		cb({
 			success: true,
@@ -139,12 +158,13 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		parties[client.roomName].songList[index].vote(data.type, client.socketid);
+		parties[client.roomName].songList[index].vote(
+			data.type,
+			client.username,
+			client.socketid,
+		);
 
 		cb({ success: true });
-
-		// data.songName
-		// data.type === "up" || "down"
 	});
 
 	socket.on("submitSong", (data, cb) => {
@@ -176,14 +196,11 @@ io.on("connection", (socket) => {
 
 		clients[socket.id].songsSubmitted += 1;
 
-		parties[clients[socket.id].roomName].submitSong(
-			data.songName,
-			socket.id,
-			client.username,
-		);
+		parties[clients[socket.id].roomName].submitSong(socket.id, client.username, {
+			...data.songData,
+		});
 
-		// data.songName
-		// data.type === "up" || "down"
+		cb({ success: true });
 	});
 
 	socket.on("searchSong", (data, cb) => {
@@ -222,6 +239,71 @@ io.on("connection", (socket) => {
 				console.log(error);
 			});
 	});
+
+	socket.on("createPlaylist", (data, cb) => {
+		let client = clients[socket.id];
+		if (!client) {
+			console.log("client doesn't exist for some reason");
+			cb({ success: false, reason: "client doesn't exist" });
+			return;
+		}
+
+		if (!client.roomName) {
+			console.log("client not in a room for some reason");
+			cb({ success: false, reason: "client not in a room for some reason" });
+			return;
+		}
+
+		let party = parties[clients[socket.id].roomName];
+
+		if (!party) {
+			console.log("party not found!");
+			cb({ success: false, reason: "party not found!" });
+			return;
+		}
+
+		let tracks = [];
+		for (let i = 0; i < party.songList.length; i++) {
+			let song = party.songList[i];
+			tracks.push(song.songData.uri);
+		}
+
+		// spotifyApi
+		// 	.createPlaylist("parth04", "HackGT Playlist Demo v." + Math.random())
+		// 	.then((data) => {
+		// 		console.log("playlist created!");
+		// 		let playlistId = data.body["id"];
+
+		// 		spotifyApi
+		// 			.addTracksToPlaylist(playlistId, tracks)
+		// 			.then((data) => {
+		// 				cb({ success: true, playlist: data });
+		// 			})
+		// 			.catch((error) => {
+		// 				console.log("promise rejected1");
+		// 				console.log(error);
+		// 			});
+		// 	})
+		// 	.catch((error) => {
+		// 		console.log("promise rejected2");
+		// 		console.log(error);
+		// 	});
+	});
+
+	socket.on("disconnect", (data) => {
+		let client = clients[socket.id];
+
+		if (client) {
+			// this.accountServerConnection.emit("clientDisconnected", {
+			// 	socketid: socket.id,
+			// 	userid: client.userid,
+			// 	timePlayed: client.timePlayed,
+			// });
+			// delete:
+			delete clients[socket.id];
+		}
+		console.log(`#clients: ${Object.keys(clients).length}`);
+	});
 });
 
 // loop through all the parties and count all the votes
@@ -234,6 +316,18 @@ setInterval(() => {
 
 		party.tallyVotes();
 
-		io.to(roomName).emit("songList", { songList: party.songList });
+		let songList = [];
+		for (let i = 0; i < party.songList.length; i++) {
+			let song = party.songList[i];
+			songList.push({
+				socketid: song.socketid,
+				username: song.username,
+				upvotes: song.upvotes,
+				votes: song.votes,
+				...song.songData,
+			});
+		}
+
+		io.to(roomName).emit("songList", { songList: songList });
 	}
 }, 200);

@@ -47,9 +47,9 @@ class SongList extends PureComponent {
 			songs.push(
 				<Song
 					key={i}
-					songName={song.songName}
-					upvotes={song.upvotes}
 					serverConnection={this.props.serverConnection}
+					username={this.props.username}
+					songData={{ ...song }}
 				/>,
 			);
 		}

@@ -1,5 +1,14 @@
 import * as types from "./ActionTypes.js";
 
+export const updateSongName = (songName) => {
+	return {
+		type: types.UPDATE_SONG_NAME,
+		payload: {
+			songName: songName,
+		},
+	};
+};
+
 export const updateSongList = (songList) => {
 	return {
 		type: types.UPDATE_SONG_LIST,

@@ -40,6 +40,8 @@ export const UPDATE_PING = "UPDATE_PING";
 // streams:
 export const RECEIVE_STREAMS = "RECEIVE_STREAMS";
 
+export const UPDATE_SONG_NAME = "UPDATE_SONG_NAME";
+
 export const UPDATE_SONG_LIST = "UPDATE_SONG_LIST";
 
 export const UPDATE_SEARCH_RESULTS = "UPDATE_SEARCH_RESULTS";

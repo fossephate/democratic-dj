@@ -33,6 +33,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 let preloadedState = {
 	songs: {
+		songName: "",
 		songList: [],
 		searchResults: [],
 	},
@@ -72,24 +73,25 @@ class Index extends Component {
 	}
 
 	componentDidMount() {
-		this.switchTheme("dark");
+		// this.switchTheme("dark");
+		this.switchTheme("spotify");
 	}
 
 	switchTheme(themeName) {
 		let theme = {};
 		switch (themeName) {
-			case "light":
-				theme = /*merge(this.state.theme, */ {
+			case "spotify":
+				theme = {
 					palette: {
-						type: "light",
+						type: "dark",
 						primary: {
-							main: "#2181ff", // #2181ff
+							main: "#1db954",
 						},
 						secondary: {
-							main: "#ff3b3b",
+							main: "#121212",
 						},
 						background: {
-							paper: "#fafafa",
+							paper: "#424242",
 						},
 					},
 				} /*)*/;

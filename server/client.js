@@ -16,13 +16,16 @@ class Client {
 }
 
 class Song {
-	constructor(songName, socketid, username) {
+	constructor(socketid, username, songData) {
 		this.socketid = socketid; // socketid of the person who submitted the song
 		this.username = username; // username of the person who submitted the song
-		this.songName = songName;
+		// this.songName = songData.songName;
 		this.upvotes = 0;
 		this.votes = [];
 		this.votedSocketids = [];
+
+		this.songName = songData.songName;
+		this.songData = songData;
 	}
 
 	tallyVotes() {
@@ -39,7 +42,7 @@ class Song {
 		}
 	}
 
-	vote(upOrDown, socketid) {
+	vote(upOrDown, username, socketid) {
 		// edit previous entry if already voted
 		if (this.votedSocketids.indexOf(socketid) > -1) {
 			// todo:
@@ -50,6 +53,7 @@ class Song {
 		} else {
 			this.votes.push({
 				type: upOrDown,
+				username: username,
 				socketid: socketid,
 			});
 			this.votedSocketids.push(socketid);
@@ -61,6 +65,8 @@ class Party {
 	constructor(socketid, roomName) {
 		this.socketid = socketid;
 		this.roomName = roomName;
+
+		this.usernames = [];
 
 		this.songSubmissionLimit = 1;
 
@@ -85,8 +91,8 @@ class Party {
 		this.songList[index].vote(upOrDown, socketid);
 	}
 
-	submitSong(songName, socketid) {
-		let song = new Song(songName, socketid);
+	submitSong(socketid, username, songData) {
+		let song = new Song(socketid, username, songData);
 		this.songList.push(song);
 	}
 

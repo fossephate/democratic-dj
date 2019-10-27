@@ -23,6 +23,9 @@ const styles = (theme) => ({
 		display: "grid",
 		flexDirection: "column",
 		gridGap: "10px",
+		padding: "15px",
+		overflowY: "scroll",
+		height: "71vh",
 	},
 });
 
@@ -37,7 +40,13 @@ class SearchResults extends PureComponent {
 		let results = [];
 		for (let i = 0; i < this.props.searchResults.length; i++) {
 			let result = this.props.searchResults[i];
-			results.push(<Result key={i} {...result} />);
+			results.push(
+				<Result
+					key={i}
+					serverConnection={this.props.serverConnection}
+					songData={{ ...result }}
+				/>,
+			);
 		}
 		return results;
 	}
