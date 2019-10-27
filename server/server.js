@@ -65,6 +65,9 @@ let parties = {};
 
 let clients = {};
 
+// hard coded for the hackathon for convienience
+parties["hackgt"] = new Party("socketid", "hackgt");
+
 io.on("connection", (socket) => {
 	clients[socket.id] = new Client(socket.id);
 	console.log(`#clients: ${Object.keys(clients).length}`);
@@ -330,4 +333,4 @@ setInterval(() => {
 
 		io.to(roomName).emit("songList", { songList: songList });
 	}
-}, 200);
+}, 400);

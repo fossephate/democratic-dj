@@ -215,7 +215,7 @@ class App extends Component {
 										<DialogTitle id="alert-dialog-title">{"Room Created!"}</DialogTitle>
 										<DialogContent>
 											<DialogContentText id="alert-dialog-description">
-												The room has been created with the room name {this.state.roomName}
+												A room has been created with the room name {this.state.roomName}
 											</DialogContentText>
 										</DialogContent>
 										<DialogActions>
