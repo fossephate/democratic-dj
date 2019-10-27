@@ -10,6 +10,7 @@ const Party = require("./client.js").Party;
 const Song = require("./client.js").Song;
 
 const session = require("express-session");
+let SpotifyWebApi = require("spotify-web-api-node");
 
 const SESSION_SECRET = config.SESSION_SECRET;
 
@@ -36,6 +37,25 @@ function generatePartyIdentifier() {
 	}
 	return identifier;
 }
+
+let spotifyApi = new SpotifyWebApi({
+	clientId: "9c4e8aa5d56847059632fb4d8323ccd7",
+	clientSecret: "9f2ddb790efa4402997be72366ef6c7f",
+});
+
+// Retrieve an access token
+spotifyApi.clientCredentialsGrant().then(
+	(data) => {
+		console.log("The access token expires in " + data.body["expires_in"]);
+		console.log("The access token is " + data.body["access_token"]);
+
+		// Save the access token so that it's used in future calls
+		spotifyApi.setAccessToken(data.body["access_token"]);
+	},
+	(error) => {
+		console.log("Something went wrong when retrieving an access token", error.message);
+	},
+);
 
 let parties = {};
 
@@ -156,10 +176,51 @@ io.on("connection", (socket) => {
 
 		clients[socket.id].songsSubmitted += 1;
 
-		parties[clients[socket.id].roomName].submitSong(data.songName, socket.id);
+		parties[clients[socket.id].roomName].submitSong(
+			data.songName,
+			socket.id,
+			client.username,
+		);
 
 		// data.songName
 		// data.type === "up" || "down"
+	});
+
+	socket.on("searchSong", (data, cb) => {
+		let client = clients[socket.id];
+		if (!client) {
+			console.log("client doesn't exist for some reason");
+			cb({ success: false, reason: "client doesn't exist" });
+			return;
+		}
+
+		if (data.songName === "") {
+			cb({ success: false, reason: "empty song" });
+			return;
+		}
+
+		spotifyApi
+			.searchTracks(data.songName)
+			.then((res) => {
+				let songs = res.body.tracks.items;
+				let items = [];
+
+				for (let i = 0; i < songs.length; i++) {
+					let item = {
+						songName: songs[i].name,
+						album: songs[i].album,
+						// albumName: songs[i].name,
+						// images: songs[i].images,
+						uri: songs[i].uri,
+					};
+					items.push(item);
+				}
+				cb({ success: true, searchResults: items });
+			})
+			.catch((error) => {
+				console.log("promise rejected");
+				console.log(error);
+			});
 	});
 });
 
@@ -175,4 +236,4 @@ setInterval(() => {
 
 		io.to(roomName).emit("songList", { songList: party.songList });
 	}
-}, 500);
+}, 200);

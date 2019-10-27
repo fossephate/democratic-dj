@@ -1,5 +1,5 @@
 {
-	"name": "Democratic DJ",
+	"name": "Democratic-DJ",
 	"version": "1.0.0",
 	"description": "https://democraticdj.io",
 	"main": "server/app.js",

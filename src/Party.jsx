@@ -11,16 +11,17 @@ import { connect } from "react-redux";
 // import handleStreamActions from "src/sagas/stream";
 // import handleStreamEvents from "src/sockets/stream";
 
-import { updateSongList } from "src/actions/songList.js";
+import { updateSongList } from "src/actions/songs.js";
 
 // main components:
 
 // components:
 import SongList from "src/components/General/SongList.jsx";
 import SongSubmitForm from "src/components/General/SongSubmitForm.jsx";
+import SearchResults from "src/components/General/SearchResults.jsx";
 
 // secondary components:
-import { Button, Paper, TextField } from "@material-ui/core";
+import { Button, TextField } from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -41,8 +42,6 @@ import localforage from "localforage";
 window.localforage = localforage;
 import swal from "sweetalert2";
 window.swal = swal;
-// import socketio from "socket.io-client";
-// import queryString from "query-string";
 
 // jss:
 const styles = {
@@ -85,11 +84,10 @@ class Party extends PureComponent {
 			username: "",
 			roomName: "",
 			openUsernameDialog: true,
-			songList: [],
+			// songList: [],
 		};
 
 		this.roomName = null;
-		// this.songList = [];
 	}
 
 	componentDidMount() {
@@ -112,8 +110,8 @@ class Party extends PureComponent {
 
 		this.socket.on("songList", (data) => {
 			// this.songList = data.songList;
-			this.setState({ songList: data.songList });
-			// this.props.updateSongList({ songList: data.songList });
+			// this.setState({ songList: data.songList });
+			this.props.updateSongList(data.songList);
 			// this.props.store.dispatch(updateSongList({ songList: data.songList }));
 		});
 	}
@@ -146,10 +144,8 @@ class Party extends PureComponent {
 		return (
 			<div className={classes.root}>
 				<SongSubmitForm serverConnection={this.props.serverConnection} />
-				<SongList
-					songList={this.state.songList}
-					serverConnection={this.props.serverConnection}
-				/>
+				<SearchResults />
+				<SongList serverConnection={this.props.serverConnection} />
 				<Dialog
 					open={this.state.openUsernameDialog}
 					onClose={() => {}}
@@ -191,9 +187,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		// updateSongList: (data) => {
-		// 	dispatch(updateSongList(data));
-		// },
+		updateSongList: (data) => {
+			dispatch(updateSongList(data));
+		},
 	};
 };
 

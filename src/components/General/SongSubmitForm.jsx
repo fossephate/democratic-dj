@@ -3,7 +3,7 @@ import React, { PureComponent } from "react";
 // import PropTypes from "prop-types";
 
 // components:
-// import Message from "./Message.jsx";
+// import SearchResults from "./SearchResults.jsx";
 
 // material ui:
 import { withStyles } from "@material-ui/core/styles";
@@ -12,11 +12,13 @@ import { Button, Paper, TextField } from "@material-ui/core";
 // redux:
 import { connect } from "react-redux";
 
+import { updateSearchResults } from "src/actions/songs.js";
+
 // recompose:
 import { compose } from "recompose";
 
 // libs:
-import swal from "sweetalert2";
+// import swal from "sweetalert2";
 
 // jss:
 
@@ -24,6 +26,7 @@ const styles = (theme) => ({
 	root: {
 		display: "flex",
 		flexDirection: "row",
+		marginBottom: "2%",
 	},
 	textField: {
 		margin: "2%",
@@ -41,6 +44,7 @@ class SongSubmitForm extends PureComponent {
 
 		this.state = {
 			songName: "",
+			searchResults: [],
 		};
 	}
 
@@ -50,6 +54,17 @@ class SongSubmitForm extends PureComponent {
 
 	handleText(event) {
 		this.setState({ songName: event.target.value });
+
+		// don't bother if the string is empty:
+		if (event.target.value === "") {
+			this.props.updateSearchResults([]);
+			return;
+		}
+
+		this.socket.emit("searchSong", { songName: event.target.value }, (data) => {
+			// console.log(data.searchResults);
+			this.props.updateSearchResults(data.searchResults);
+		});
 	}
 
 	handleSubmitSong() {
@@ -64,20 +79,14 @@ class SongSubmitForm extends PureComponent {
 				}
 			},
 		);
+		this.setState({ songName: "" });
 	}
 
 	render() {
 		const { classes } = this.props;
 
 		return (
-			<Paper
-				id="songSubmitForm"
-				className={classes.root}
-				elevation={4}
-				ref={(el) => {
-					this.rootRef = el;
-				}}
-			>
+			<Paper id="songSubmitForm" className={classes.root} elevation={4}>
 				<TextField
 					id="outlined-name"
 					label="Song Name"
@@ -106,7 +115,11 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-	return {};
+	return {
+		updateSearchResults: (data) => {
+			dispatch(updateSearchResults(data));
+		},
+	};
 };
 
 export default compose(

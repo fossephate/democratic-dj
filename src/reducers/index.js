@@ -1,10 +1,10 @@
 import { combineReducers } from "redux";
 import { reducer as form } from "redux-form";
 
-import songList from "./songList.js";
+import songs from "./songs.js";
 
 const rootReducer = combineReducers({
-	songList,
+	songs,
 	form,
 });
 

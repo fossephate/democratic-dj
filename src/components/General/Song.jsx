@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import { compose } from "recompose";
 
 // libs:
-import swal from "sweetalert2";
+import classNames from "classnames";
 
 // jss:
 
@@ -24,10 +24,24 @@ const styles = (theme) => ({
 	root: {
 		display: "flex",
 		flexDirection: "row",
-		height: "70px",
+		// height: "70px",
+		// lineHeight: "48px",
 		lineHeight: "70px",
 		paddingLeft: "3%",
 		fontSize: "20px",
+	},
+	highlighted: {
+		backgroundColor: "#FAFAD2AA",
+	},
+	songName: {
+		// height: "70px",
+	},
+	icon: {
+		width: "70px",
+	},
+	songUpvotes: {
+		width: "30px",
+		textAlign: "center",
 	},
 });
 
@@ -38,12 +52,19 @@ class Song extends PureComponent {
 		this.handleUpvote = this.handleUpvote.bind(this);
 		this.handleDownvote = this.handleDownvote.bind(this);
 
-		this.state = {};
+		this.state = {
+			upvoteState: 0,
+		};
 	}
 
 	componentDidMount() {}
 
 	handleUpvote() {
+		if (this.state.upvoteState === 1) {
+			this.neutralVote();
+			return;
+		}
+
 		this.props.serverConnection.emit(
 			"vote",
 			{
@@ -51,13 +72,19 @@ class Song extends PureComponent {
 				type: "up",
 			},
 			(data) => {
-				console.log(data);
+				if (data.success) {
+					this.setState({ upvoteState: 1 });
+				}
 			},
 		);
 	}
 
 	handleDownvote() {
-		console.log("a");
+		if (this.state.upvoteState === -1) {
+			this.neutralVote();
+			return;
+		}
+
 		this.props.serverConnection.emit(
 			"vote",
 			{
@@ -65,7 +92,24 @@ class Song extends PureComponent {
 				type: "down",
 			},
 			(data) => {
-				console.log(data);
+				if (data.success) {
+					this.setState({ upvoteState: -1 });
+				}
+			},
+		);
+	}
+
+	neutralVote() {
+		this.props.serverConnection.emit(
+			"vote",
+			{
+				songName: this.props.songName,
+				type: "neutral",
+			},
+			(data) => {
+				if (data.success) {
+					this.setState({ upvoteState: 0 });
+				}
 			},
 		);
 	}
@@ -80,20 +124,29 @@ class Song extends PureComponent {
 					color="primary"
 					size="medium"
 					onClick={this.handleUpvote}
+					className={classNames(
+						classes.icon,
+						this.state.upvoteState === 1 && classes.highlighted,
+					)}
 				>
 					<ArrowUpwardIcon />
 				</IconButton>
-				{this.props.upvotes}
+				<div className={classes.songUpvotes}>{this.props.upvotes}</div>
+				{/* <div className={classes.spacer}></div> */}
 				<IconButton
 					variant="contained"
 					color="secondary"
 					size="medium"
 					onClick={this.handleDownvote}
+					className={classNames(
+						classes.icon,
+						this.state.upvoteState === -1 && classes.highlighted,
+					)}
 				>
 					<ArrowDownwardIcon />
 				</IconButton>
 				<div style={{ width: "100px" }}></div>
-				{this.props.songName}
+				<div className={classes.songName}>{this.props.songName}</div>
 			</Paper>
 		);
 	}

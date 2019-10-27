@@ -69,7 +69,7 @@ class SongList extends PureComponent {
 
 const mapStateToProps = (state) => {
 	return {
-		// songList: state.songList,
+		songList: state.songs.songList,
 	};
 };
 

@@ -16,8 +16,9 @@ class Client {
 }
 
 class Song {
-	constructor(songName, socketid) {
+	constructor(songName, socketid, username) {
 		this.socketid = socketid; // socketid of the person who submitted the song
+		this.username = username; // username of the person who submitted the song
 		this.songName = songName;
 		this.upvotes = 0;
 		this.votes = [];
@@ -28,7 +29,13 @@ class Song {
 		this.upvotes = 0;
 		for (let i = 0; i < this.votes.length; i++) {
 			let vote = this.votes[i];
-			this.upvotes += vote.type === "up" ? 1 : -1;
+			if (vote.type === "up") {
+				this.upvotes += 1;
+			} else if (vote.type === "down") {
+				this.upvotes -= 1;
+			} else if (vote.type === "neutral") {
+				// this.upvotes += 0;
+			}
 		}
 	}
 
@@ -89,6 +96,10 @@ class Party {
 		}
 
 		this.sortSongList();
+	}
+
+	tallyScore() {
+		// todo:
 	}
 
 	sortSongList() {
