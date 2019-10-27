@@ -35,10 +35,9 @@ class Song {
 	vote(upOrDown, socketid) {
 		// edit previous entry if already voted
 		if (this.votedSocketids.indexOf(socketid) > -1) {
-			// todo:
-			// loop through this.votes and find the index vote with a socketid that matches the
-			// socketid passed to this function and modify the vote so that vote.type = upOrDown
-			//
+			var indexOfVote = this.votes.findIndex( x => x.socketid === socketid);
+            this.votes[indexOfVote].socketid = socketid;
+
 		} else {
 			this.votes.push({
 				type: upOrDown,
@@ -80,6 +79,10 @@ class Party {
 	submitSong(songName, socketid) {
 		let song = new Song(songName, socketid);
 		this.songList.push(song);
+	}
+
+	sortSongList() {
+		this.songList.sort((a,b) => b.currentTotal - a.currentTotal);
 	}
 }
 
