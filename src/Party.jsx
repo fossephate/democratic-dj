@@ -1,8 +1,8 @@
 // react:
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 
 // react-router:
-import { Route, Switch, withRouter } from "react-router";
+import { withRouter } from "react-router";
 
 // redux:
 import { connect } from "react-redux";
@@ -11,10 +11,13 @@ import { connect } from "react-redux";
 // import handleStreamActions from "src/sagas/stream";
 // import handleStreamEvents from "src/sockets/stream";
 
+import { updateSongList } from "src/actions/songList.js";
+
 // main components:
 
 // components:
 import SongList from "src/components/General/SongList.jsx";
+import SongSubmitForm from "src/components/General/SongSubmitForm.jsx";
 
 // secondary components:
 import { Button, Paper, TextField } from "@material-ui/core";
@@ -38,8 +41,8 @@ import localforage from "localforage";
 window.localforage = localforage;
 import swal from "sweetalert2";
 window.swal = swal;
-import socketio from "socket.io-client";
-import queryString from "query-string";
+// import socketio from "socket.io-client";
+// import queryString from "query-string";
 
 // jss:
 const styles = {
@@ -70,7 +73,7 @@ const styles = {
 	},
 };
 
-class Party extends Component {
+class Party extends PureComponent {
 	constructor(props) {
 		super(props);
 		this.socket = null;
@@ -82,9 +85,11 @@ class Party extends Component {
 			username: "",
 			roomName: "",
 			openUsernameDialog: true,
+			songList: [],
 		};
 
 		this.roomName = null;
+		// this.songList = [];
 	}
 
 	componentDidMount() {
@@ -104,6 +109,13 @@ class Party extends Component {
 		if (!this.roomName) {
 			console.log("room name not set!");
 		}
+
+		this.socket.on("songList", (data) => {
+			// this.songList = data.songList;
+			this.setState({ songList: data.songList });
+			// this.props.updateSongList({ songList: data.songList });
+			// this.props.store.dispatch(updateSongList({ songList: data.songList }));
+		});
 	}
 
 	componentWillUnmount() {}
@@ -113,7 +125,7 @@ class Party extends Component {
 	// }
 
 	handleSubmitUsername() {
-		this.socket.emit("joinRoom", { room: this.roomName }, (data) => {
+		this.socket.emit("joinRoom", { roomName: this.roomName }, (data) => {
 			if (data.success) {
 				this.setState({ openUsernameDialog: false });
 			} else {
@@ -133,8 +145,11 @@ class Party extends Component {
 
 		return (
 			<div className={classes.root}>
-				<div>a</div>
-
+				<SongSubmitForm serverConnection={this.props.serverConnection} />
+				<SongList
+					songList={this.state.songList}
+					serverConnection={this.props.serverConnection}
+				/>
 				<Dialog
 					open={this.state.openUsernameDialog}
 					onClose={() => {}}
@@ -151,6 +166,11 @@ class Party extends Component {
 							type="username"
 							value={this.state.username}
 							onChange={this.handleText}
+							onKeyPress={(event) => {
+								if (event.key == "Enter") {
+									this.handleSubmitUsername();
+								}
+							}}
 							fullWidth
 						/>
 					</DialogContent>
@@ -170,7 +190,11 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-	return {};
+	return {
+		// updateSongList: (data) => {
+		// 	dispatch(updateSongList(data));
+		// },
+	};
 };
 
 export default compose(

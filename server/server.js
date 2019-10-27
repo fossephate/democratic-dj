@@ -75,10 +75,8 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		let roomName = data.roomName;
-
-		socket.join(roomName);
-		clients[socket.id].roomName = roomName;
+		socket.join(data.roomName);
+		clients[socket.id].roomName = data.roomName;
 		clients[socket.id].username = data.username || "empty";
 
 		cb({
@@ -100,13 +98,30 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		let party = parties[clients[socket.id].roomName];
+		let party = parties[client.roomName];
 
 		if (!party) {
 			console.log("party not found!");
 			cb({ success: false, reason: "party not found!" });
 			return;
 		}
+
+		let index = null;
+		for (let i = 0; i < party.songList.length; i++) {
+			if (party.songList[i].songName === data.songName) {
+				index = i;
+				break;
+			}
+		}
+		if (index === null) {
+			console.log("song not found!");
+			cb({ success: false, reason: "song not found!" });
+			return;
+		}
+
+		parties[client.roomName].songList[index].vote(data.type, client.socketid);
+
+		cb({ success: true });
 
 		// data.songName
 		// data.type === "up" || "down"
@@ -155,5 +170,9 @@ setInterval(() => {
 		let party = parties[roomName];
 
 		// todo: count votes:
+
+		party.tallyVotes();
+
+		io.to(roomName).emit("songList", { songList: party.songList });
 	}
-}, 3000);
+}, 500);

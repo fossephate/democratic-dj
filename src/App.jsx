@@ -154,7 +154,7 @@ class App extends Component {
 									{...props}
 									store={this.props.store}
 									serverConnection={this.props.serverConnection}
-									sagaMiddleware={this.props.sagaMiddleware}
+									// sagaMiddleware={this.props.sagaMiddleware}
 								/>
 							);
 						}}

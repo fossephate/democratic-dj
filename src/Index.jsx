@@ -32,7 +32,7 @@ const sagaMiddleware = createSagaMiddleware();
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 let preloadedState = {
-	songList: [],
+	songList: [{ songName: "Song 1", currentTotal: 10 }],
 	form: {},
 };
 
