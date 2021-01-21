@@ -48,7 +48,7 @@
     "deepmerge": "^4.2.1",
     "express": "^4.16.3",
     "express-session": "^1.17.0",
-    "immer": "^4.0.2",
+    "immer": "^8.0.1",
     "jquery": "^3.3.1",
     "js-cookie": "^2.2.0",
     "keycode": "^2.2.0",
