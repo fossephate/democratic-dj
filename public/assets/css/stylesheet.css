@@ -1,0 +1,59 @@
+body {
+	/* font: 13px Helvetica, Arial; */
+	font-family: "Roboto", sans-serif !important;
+	margin: 0;
+	width: 100%;
+	/* height: 100%; */
+	/* padding: 0 !important; */
+	/* overflow-y: auto !important; */
+}
+
+/* hide the scrollbar */
+
+.hideScrollbar {
+	overflow: hidden !important;
+}
+
+.hideScrollbar > div > div {
+	padding: 0 !important;
+}
+
+html,
+body {
+	margin: 0;
+	/* height: auto; */
+	height: 100%;
+}
+
+#root {
+	height: 100%;
+}
+
+/* MISC */
+
+.contents {
+	display: contents;
+}
+
+.displayNone {
+	display: none;
+}
+
+.click-passthrough {
+	pointer-events: none;
+}
+
+/* SWEET ALERT */
+
+.swal-wide {
+	width: 1000px !important;
+}
+
+/* from bootstrap reset.less: */
+img {
+	/* max-width: 100%; */
+	/* width: auto; */
+	/* height: auto; */
+	vertical-align: middle;
+	/* border: 0; */
+}

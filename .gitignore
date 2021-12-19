@@ -1,0 +1,9 @@
+# Custom
+*.db
+full/
+node_modules/
+config.js
+myDatabase/
+db/
+log.txt
+server/log.txt
