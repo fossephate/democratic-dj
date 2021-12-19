@@ -57,6 +57,7 @@ const styles = (theme) => ({
 		marginLeft: "-0.5em",
 		top: "50%",
 		marginTop: "-0.5em",
+		filter: "brightness(0%)",
 	},
 	[device.tablet]: {
 		root: {

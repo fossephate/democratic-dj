@@ -1290,9 +1290,7 @@ var Room = /*#__PURE__*/function (_PureComponent) {
         roomName: _this.roomName,
         username: _this.state.username
       }).then(function () {
-        window.location.href = "https://accounts.spotify.com/authorize?response_type=code&client_id=501dbd9176ef4ef9af88bfedf7cb7e5a\
-					&scope=playlist-modify-private%20user-read-private%20user-read-email%20playlist-read-collaborative%20user-modify-playback-state%20playlist-modify-public%20playlist-read-private\
-					&redirect_uri=https%3A%2F%2Ffosse.co%2Fdj%2Fcallback";
+        window.location.href = "https://accounts.spotify.com/authorize?response_type=code&client_id=501dbd9176ef4ef9af88bfedf7cb7e5a&scope=playlist-modify-private%20user-read-private%20user-read-email%20playlist-read-collaborative%20user-modify-playback-state%20playlist-modify-public%20playlist-read-private&redirect_uri=https%3A%2F%2Ffosse.co%2Fdj%2Fcallback";
       });
     });
 
@@ -1446,7 +1444,7 @@ var Room = /*#__PURE__*/function (_PureComponent) {
         source: this.props.songList,
         type: "songs"
       }), !this.state.loggedIn ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core_esm_Button__WEBPACK_IMPORTED_MODULE_6__["default"], {
-        className: classes.exportButton,
+        className: "",
         onClick: this.handleLogin,
         color: "primary",
         variant: "contained"
@@ -2310,7 +2308,8 @@ var styles = function styles(theme) {
       left: "50%",
       marginLeft: "-0.5em",
       top: "50%",
-      marginTop: "-0.5em"
+      marginTop: "-0.5em",
+      filter: "brightness(0%)"
     }
   }, _defineProperty(_ref, shared_libs_utils_js__WEBPACK_IMPORTED_MODULE_6__["device"].tablet, {
     root: {

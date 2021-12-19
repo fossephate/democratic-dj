@@ -274,7 +274,7 @@ class Room extends PureComponent {
 
         {!this.state.loggedIn ? (
           <Button
-            className={classes.exportButton}
+            className=""
             onClick={this.handleLogin}
             color="primary"
             variant="contained"
